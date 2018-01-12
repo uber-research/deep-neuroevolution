@@ -1,0 +1,41 @@
+{
+  "config": {
+    "calc_obstat_prob": 0.01,
+    "episodes_per_batch": 1000,
+    "eval_prob": 0.03,
+    "l2coeff": 0.005,
+    "noise_stdev": 0.02,
+    "snapshot_freq": 10,
+    "timesteps_per_batch": 100000,
+    "return_proc_mode": "centered_sign_rank",
+    "episode_cutoff_mode": "env_default"
+  },
+  "env_id": "Humanoid-v1",
+  "algo_type": "ns",
+  "exp_prefix": "humanoid",
+  "novelty_search": {
+    "k": 10,
+    "population_size": 5,
+    "num_rollouts": 5,
+    "selection_method": "novelty_prob"
+  },
+  "optimizer": {
+    "args": {
+      "stepsize": 0.01
+    },
+    "type": "adam"
+  },
+  "policy": {
+    "args": {
+      "ac_bins": "continuous:",
+      "ac_noise_std": 0.01,
+      "connection_type": "ff",
+      "hidden_dims": [
+        256,
+        256
+      ],
+      "nonlin_type": "tanh"
+    },
+    "type": "MujocoPolicy"
+  }
+}

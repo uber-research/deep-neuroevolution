@@ -1,0 +1,31 @@
+{
+  "config": {
+    "calc_obstat_prob": 0.0,
+    "episodes_per_batch": 100,
+    "eval_prob": 0.03,
+    "l2coeff": 0.005,
+    "noise_stdev": 0.02,
+    "snapshot_freq": 10,
+    "timesteps_per_batch": 1000,
+    "return_proc_mode": "centered_sign_rank",
+    "episode_cutoff_mode": 5000
+  },
+  "env_id": "FrostbiteNoFrameskip-v4",
+  "algo_type": "ns",
+  "novelty_search": {
+    "k": 10,
+    "population_size": 3,
+    "num_rollouts": 1,
+    "selection_method": "novelty_prob"
+  },
+  "optimizer": {
+    "args": {
+      "stepsize": 0.01
+    },
+    "type": "adam"
+  },
+  "policy": {
+    "args": {},
+    "type": "ESAtariPolicy"
+  }
+}

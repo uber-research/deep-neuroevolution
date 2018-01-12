@@ -1,0 +1,8 @@
+*.DS_Store
+__pycache__/
+env/
+*.pyc
+*.pkl
+*.p
+mujoco/mjpro131
+*.h5

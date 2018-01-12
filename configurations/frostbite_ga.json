@@ -1,0 +1,22 @@
+{
+  "config": {
+    "calc_obstat_prob": 0.0,
+    "episodes_per_batch": 5000,
+    "eval_prob": 0.01,
+    "l2coeff": 0.005,
+    "noise_stdev": 0.005,
+    "snapshot_freq": 20,
+    "timesteps_per_batch": 10000,
+    "return_proc_mode": "centered_rank",
+    "episode_cutoff_mode": 5000
+  },
+  "population_size": 10,
+  "num_elites": 1,
+  "env_id": "FrostbiteNoFrameskip-v4",
+  "policy": {
+    "args" : {
+      "nonlin_type": "relu"
+    },
+    "type": "GAAtariPolicy"
+  }
+}
