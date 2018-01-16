@@ -10,7 +10,7 @@ Our code is based off of code from OpenAI, who we thank. The original code and r
 
 Note: The Humanoid experiment depends on [Mujoco](http://www.mujoco.org/). Please provide your own Mujoco license and binary
 
-The blog post describing these papers can be found [here](https://eng.uber.com/deep-neuroevolution/)
+The article describing these papers can be found [here](https://eng.uber.com/deep-neuroevolution/)
 
 ## How to run locally
 
