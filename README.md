@@ -6,7 +6,7 @@ This repo contains distributed implementations of the algorithms described in:
 
 [2] [Improving Exploration in Evolution Strategies for Deep Reinforcement Learning via a Population of Novelty-Seeking Agents](https://arxiv.org/abs/1712.06560)
 
-Our code is based off of code from OpenAI, who we thank. The original code and related paper from OpenAI can be found here. The repo has been modified to run both ES and our algorithms, including our Deep Genetic Algorithm (DeepGA) locally and on AWS.
+Our code is based off of code from OpenAI, who we thank. The original code and related paper from OpenAI can be found [here](https://github.com/openai/evolution-strategies-starter). The repo has been modified to run both ES and our algorithms, including our Deep Genetic Algorithm (DeepGA) locally and on AWS.
 
 Note: The Humanoid experiment depends on [Mujoco](http://www.mujoco.org/). Please provide your own Mujoco license and binary
 
