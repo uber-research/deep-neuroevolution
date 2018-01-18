@@ -1,11 +1,6 @@
-import logging
-import time
-from collections import namedtuple
-
-import numpy as np
-
-from .dist import MasterClient, WorkerClient
 from .es import *
+
+GATask = namedtuple('GATask', ['params', 'population', 'ob_mean', 'ob_std', 'timestep_limit'])
 
 
 def setup(exp, single_threaded):
@@ -33,7 +28,7 @@ def rollout_and_update_ob_stat(policy, env, timestep_limit, rs, task_ob_stat, ca
         rollout_rews, rollout_len = policy.rollout(env, timestep_limit=timestep_limit, random_stream=rs)
     return rollout_rews, rollout_len
 
-GATask = namedtuple('GATask', ['params', 'population', 'ob_mean', 'ob_std', 'timestep_limit'])
+
 def run_master(master_redis_cfg, log_dir, exp):
     logger.info('run_master: {}'.format(locals()))
     from .optimizers import SGD, Adam
@@ -76,6 +71,11 @@ def run_master(master_redis_cfg, log_dir, exp):
         step_tstart = time.time()
         theta = policy.get_trainable_flat()
         assert theta.dtype == np.float32
+        if policy.needs_ob_stat:
+            ob_stat = RunningStat(
+                env.observation_space.shape,
+                eps=1e-2  # eps to prevent dividing by zero at the beginning when computing mean/stdev
+            )
 
         curr_task_id = master.declare_task(GATask(
             params=theta,
@@ -203,6 +203,7 @@ def run_master(master_redis_cfg, log_dir, exp):
             assert not osp.exists(filename)
             policy.save(filename)
             tlogger.log('Saved snapshot {}'.format(filename))
+
 
 def run_worker(master_redis_cfg, relay_redis_cfg, noise, *, min_task_runtime=.2):
     logger.info('run_worker: {}'.format(locals()))
