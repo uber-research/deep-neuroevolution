@@ -34,16 +34,16 @@ def run_master(master_redis_cfg, log_dir, exp):
     master.declare_experiment(exp)
     best_score = float('-inf')
 
-    if policy.needs_ob_stat:
-        ob_stat = RunningStat(
-            env.observation_space.shape,
-            eps=1e-2  # eps to prevent dividing by zero at the beginning when computing mean/stdev
-        )
-
     while True:
         step_tstart = time.time()
         theta = policy.get_trainable_flat()
         assert theta.dtype == np.float32
+
+        if policy.needs_ob_stat:
+            ob_stat = RunningStat(
+                env.observation_space.shape,
+                eps=1e-2  # eps to prevent dividing by zero at the beginning when computing mean/stdev
+            )
 
         curr_task_id = master.declare_task(Task(
             params=theta,
