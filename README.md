@@ -76,3 +76,6 @@ python -m scripts.viz 'Humanoid-v1' <YOUR_H5_FILE>
 ### extra folder
 The extra folder holds the XML specification file for the  Humanoid
 Locomotion with Deceptive Trap domain used in https://arxiv.org/abs/1712.06560. Use this XML file in gym to recreate the environment.
+
+### Visual Inspector for NeuroEvolution (VINE)
+The folder `./visual_inspector` contains implementations of VINE, i.e., Visual Inspector for NeuroEvolution, an interactive data visualization tool for neuroevolution.

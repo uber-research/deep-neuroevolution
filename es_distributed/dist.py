@@ -86,6 +86,9 @@ class MasterClient:
         logger.debug('[master] Popped a result for task {}'.format(task_id))
         return task_id, result
 
+    def flush_results(self):
+        return max(self.master_redis.pipeline().llen(RESULTS_KEY).ltrim(RESULTS_KEY, -1, -1).execute()[0] -1, 0)
+
     def add_to_novelty_archive(self, novelty_vector):
         self.master_redis.rpush(ARCHIVE_KEY, serialize(novelty_vector))
         logger.info('[master] Added novelty vector to archive')
@@ -134,10 +137,17 @@ class RelayClient:
                 logger.info('[relay] Average batch size {:.3f} ({} total)'.format(sum(batch_sizes) / len(batch_sizes), self.results_published))
                 last_print_time = curr_time
 
+    def flush_results(self):
+        number_flushed = max(self.local_redis.pipeline().llen(RESULTS_KEY).ltrim(RESULTS_KEY, -1, -1).execute()[0] -1, 0)
+        number_flushed_master = max(self.master_redis.pipeline().llen(RESULTS_KEY).ltrim(RESULTS_KEY, -1, -1).execute()[0] -1, 0)
+        logger.warning('[relay] Flushed {} results from worker redis and {} from master'
+            .format(number_flushed, number_flushed_master))
+
     def _declare_task_local(self, task_id, task_data):
         logger.info('[relay] Received task {}'.format(task_id))
         self.results_published = 0
         self.local_redis.mset({TASK_ID_KEY: task_id, TASK_DATA_KEY: task_data})
+        self.flush_results()
 
 
 class WorkerClient:

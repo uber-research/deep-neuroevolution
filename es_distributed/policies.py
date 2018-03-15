@@ -256,7 +256,7 @@ class MujocoPolicy(Policy):
         return center[0], center[1], center[2]
 
 
-    def rollout(self, env, *, render=False, timestep_limit=None, save_obs=False, random_stream=None):
+    def rollout(self, env, *, render=False, timestep_limit=None, save_obs=False, random_stream=None, policy_seed=None, bc_choice=None):
         """
         If random_stream is provided, the rollout will take noisy actions with noise drawn from that stream.
         Otherwise, no action noise will be added.
@@ -264,15 +264,24 @@ class MujocoPolicy(Policy):
         env_timestep_limit = env.spec.tags.get('wrapper_config.TimeLimit.max_episode_steps')
         timestep_limit = env_timestep_limit if timestep_limit is None else min(timestep_limit, env_timestep_limit)
         rews = []
+        x_traj, y_traj = np.zeros(timestep_limit), np.zeros(timestep_limit)
         t = 0
         if save_obs:
             obs = []
+
+        if policy_seed:
+            env.seed(policy_seed)
+            np.random.seed(policy_seed)
+            if random_stream:
+                random_stream.seed(policy_seed)
+
         ob = env.reset()
         for _ in range(timestep_limit):
             ac = self.act(ob[None], random_stream=random_stream)[0]
             if save_obs:
                 obs.append(ob)
             ob, rew, done, _ = env.step(ac)
+            x_traj[t], y_traj[t], _ = self._get_pos(env.unwrapped.model)
             rews.append(rew)
             t += 1
             if render:
@@ -282,7 +291,12 @@ class MujocoPolicy(Policy):
 
         x_pos, y_pos, _ = self._get_pos(env.unwrapped.model)
         rews = np.array(rews, dtype=np.float32)
-        novelty_vector = np.array([x_pos, y_pos])
+        x_traj[t:] = x_traj[t-1]
+        y_traj[t:] = y_traj[t-1]
+        if bc_choice and bc_choice == "traj":
+            novelty_vector = np.concatenate((x_traj, y_traj), axis=0)
+        else:
+            novelty_vector = np.array([x_pos, y_pos])
         if save_obs:
             return rews, t, np.array(obs), novelty_vector
         return rews, t, novelty_vector
@@ -297,7 +311,7 @@ class ESAtariPolicy(Policy):
         with tf.variable_scope(type(self).__name__) as scope:
             o = tf.placeholder(tf.float32, [None] + list(self.ob_space_shape))
             is_ref_ph = tf.placeholder(tf.bool, shape=[])
-        
+
             a = self._make_net(o, is_ref_ph)
             self._act = U.function([o, is_ref_ph] , a)
         return scope
@@ -308,7 +322,7 @@ class ESAtariPolicy(Policy):
         x = layers.batch_norm(x, scale=True, is_training=is_ref, decay=0., updates_collections=None, activation_fn=tf.nn.relu, epsilon=1e-3)
         x = layers.convolution2d(x, num_outputs=32, kernel_size=4, stride=2, activation_fn=None, scope='conv2')
         x = layers.batch_norm(x, scale=True, is_training=is_ref, decay=0., updates_collections=None, activation_fn=tf.nn.relu, epsilon=1e-3)
-      
+
         x = layers.flatten(x)
         x = layers.fully_connected(x, num_outputs=256, activation_fn=None, scope='fc')
         x = layers.batch_norm(x, scale=True, is_training=is_ref, decay=0., updates_collections=None, activation_fn=tf.nn.relu, epsilon=1e-3)
@@ -332,7 +346,7 @@ class ESAtariPolicy(Policy):
         """
         Initializes weights from another policy, which must have the same architecture (variable names),
         but the weight arrays can be smaller than the current policy.
-        """ 
+        """
         with h5py.File(filename, 'r') as f:
             f_var_names = []
             f.visititems(lambda name, obj: f_var_names.append(name) if isinstance(obj, h5py.Dataset) else None)
@@ -380,7 +394,7 @@ class ESAtariPolicy(Policy):
             np.random.seed(policy_seed)
             if random_stream:
                 random_stream.seed(policy_seed)
-                
+
         ob = env.reset()
         self.act(self.ref_list, random_stream=random_stream) #passing ref batch through network
 
@@ -390,7 +404,7 @@ class ESAtariPolicy(Policy):
 
             if worker_stats:
                 worker_stats.time_comp_act += time.time() - start_time
-                
+
             start_time = time.time()
             ob, rew, done, info = env.step(ac)
             ram = env.unwrapped._get_ram() # extracts RAM state information
@@ -463,12 +477,18 @@ class GAAtariPolicy(Policy):
         """
         env_timestep_limit = env.spec.tags.get('wrapper_config.TimeLimit.max_episode_steps')
         timestep_limit = env_timestep_limit if timestep_limit is None else min(timestep_limit, env_timestep_limit)
-        rews = []
+        rews = []; novelty_vector = []
         rollout_details = {}
         t = 0
 
         if save_obs:
             obs = []
+
+        if policy_seed:
+            env.seed(policy_seed)
+            np.random.seed(policy_seed)
+            if random_stream:
+                random_stream.seed(policy_seed)
 
         ob = env.reset()
         for _ in range(timestep_limit):
@@ -487,7 +507,8 @@ class GAAtariPolicy(Policy):
 
         # Copy over final positions to the max timesteps
         rews = np.array(rews, dtype=np.float32)
+        novelty_vector = env.unwrapped._get_ram() # extracts RAM state information
         if save_obs:
-            return rews, t, np.array(obs)
-        return rews, t
+            return rews, t, np.array(obs), np.array(novelty_vector)
+        return rews, t, np.array(novelty_vector)
 
