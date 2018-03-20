@@ -20,7 +20,7 @@ def main(env_id, policy_file, record, stochastic, extra_kwargs):
 
     env = gym.make(env_id)
     if is_atari_policy:
-        env = ScaledFloatFrame(wrap_deepmind(env))
+        env = wrap_deepmind(env)
 
     if record:
         import uuid
@@ -38,7 +38,8 @@ def main(env_id, policy_file, record, stochastic, extra_kwargs):
             pi = MujocoPolicy.Load(policy_file, extra_kwargs=extra_kwargs)
             
         while True:
-            rews, t = pi.rollout(env, render=True, random_stream=np.random if stochastic else None)
+            if is_atari_policy:
+                rews, t, novelty_vector = pi.rollout(env, render=True, random_stream=np.random if stochastic else None)
             print('return={:.4f} len={}'.format(rews.sum(), t))
 
             if record:
