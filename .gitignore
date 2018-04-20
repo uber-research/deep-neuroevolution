@@ -6,3 +6,4 @@ env/
 *.p
 mujoco/mjpro131
 *.h5
+gym_tensorflow.so

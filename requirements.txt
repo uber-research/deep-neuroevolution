@@ -13,4 +13,3 @@ requests==2.14.2
 six==1.10.0
 tensorflow==0.12.1
 Werkzeug==0.12.1
-atari-py==0.1.1
