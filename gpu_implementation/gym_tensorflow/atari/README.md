@@ -1,6 +1,8 @@
-License warning
+Notice
 -----------------
-The ALE is licensed under GPLv2.
+The ALE/atari-py is not part of deep-neuroevolution.
+This folder provides the instructions and sample code if you are interested in running the ALE.
+It depends on atari-py. atari-py is licensed under GPLv2.
 
 Instructions
 -----------------
