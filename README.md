@@ -15,6 +15,9 @@ The article describing these papers can be found [here](https://eng.uber.com/dee
 ## Visual Inspector for NeuroEvolution (VINE)
 The folder `./visual_inspector` contains implementations of VINE, i.e., Visual Inspector for NeuroEvolution, an interactive data visualization tool for neuroevolution. Refer to `README.md` in that folder for further instructions on running and customizing your visualization. An article describing this visualization tool can be found [here](https://eng.uber.com/vine/).
 
+## Accelerated Deep Neurevolution
+The folder `./gpu_implementation` contains an implementation that uses GPU more efficiently. Refer to `README.md` in that folder for further instructions.
+
 ## How to run locally
 
 clone repo
