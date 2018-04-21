@@ -18,7 +18,7 @@ screen_size = {'name_this_game': (210, 160), 'hero': (210, 160), 'space_invaders
 
 
 class AtariEnv(TensorFlowEnv):
-    def __init__(self, game, batch_size, warp_size=(84, 84), num_stacked_frames=4, color_pallete=None, frameskip=4, name=None):
+    def __init__(self, game, batch_size, warp_size=(84, 84), color_pallete=None, frameskip=4, name=None):
         assert game in games, "{} is not part of the available Atari suite".format(game)
         if color_pallete is None:
             color_pallete = grayscale_palette
@@ -27,16 +27,11 @@ class AtariEnv(TensorFlowEnv):
         self.batch_size = batch_size
         self.obs_variable = None
         self.warp_size = warp_size
-        self.num_stacked_frames = num_stacked_frames
         self.color_pallete = color_pallete
         self.frameskip = frameskip
-        self.obs_size = self.warp_size + (self.num_stacked_frames * self.color_pallete.shape[1],)
 
         rom = os.path.join(os.path.dirname(__file__), '..', 'atari-py/atari_py/atari_roms/{}.bin'.format(game))
         with tf.variable_scope(name, default_name='AtariInstance'):
-            if self.obs_variable is None:
-                obs_size = self.warp_size + ((self.num_stacked_frames-1) * self.color_pallete.shape[1],)
-                self.obs_variable = tf.Variable(np.zeros((self.batch_size,) + obs_size, dtype=np.float32), trainable=False)
             self.instances = gym_tensorflow_module.atari_make(batch_size=batch_size, game=rom)
 
     @property
@@ -48,12 +43,12 @@ class AtariEnv(TensorFlowEnv):
         return game_actions[self.game]
 
     @property
-    def discrete_action(self):
-        return True
+    def observation_space(self):
+        return (self.batch_size, ) + self.warp_size + (self.color_pallete.shape[1],)
 
     @property
-    def op(self):
-        return self.instances.op
+    def discrete_action(self):
+        return True
 
     def step(self, action, indices=None, name=None):
         if indices is None:
@@ -74,10 +69,14 @@ class AtariEnv(TensorFlowEnv):
             import collections
             if not isinstance(max_frames, collections.Sequence):
                 max_frames = tf.ones_like(indices, dtype=tf.int32) * max_frames
-            obs_size = self.warp_size + ((self.num_stacked_frames-1) * self.color_pallete.shape[1],)
-            reset_obs = tf.scatter_update(self.obs_variable, indices, tf.zeros(tf.concat([tf.shape(indices), obs_size], axis=0)))
-            with tf.control_dependencies([reset_obs]):
-                return gym_tensorflow_module.environment_reset(self.instances, indices, noops=noops, max_frames=max_frames)
+            return gym_tensorflow_module.environment_reset(self.instances, indices, noops=noops, max_frames=max_frames)
+
+    def render(self, indices=None):
+        if indices is None:
+            indices = np.arange(self.batch_size)
+        with tf.device('/cpu:0'):
+            obs = gym_tensorflow_module.environment_observation(self.instances, indices, T=tf.uint8)
+            return tf.gather(tf.constant(rgb_palette_uint8), tf.cast(obs, tf.int32))
 
     def observation(self, indices=None, name=None):
         '''Returns current observation after preprocessing (skip, grayscale, warp, stack).\nMust be called ONCE each time step is called if num_stacked_frames > 1
@@ -87,18 +86,13 @@ class AtariEnv(TensorFlowEnv):
         with tf.variable_scope(name, default_name='AtariObservation'):
             with tf.device('/cpu:0'):
                 obs = gym_tensorflow_module.environment_observation(self.instances, indices, T=tf.uint8)
-                self.raw_pixels = tf.gather(tf.constant(rgb_palette_uint8), tf.cast(obs, tf.int32))
 
             obs = tf.gather(tf.constant(self.color_pallete), tf.cast(obs, tf.int32))
             obs = tf.reduce_max(obs, axis=1)
             obs = tf.image.resize_bilinear(obs, self.warp_size, align_corners=True)
             obs.set_shape((None,) + self.warp_size + (1,))
+            return obs
 
-            obs_batch = tf.gather(self.obs_variable, indices)
-            obs_batch = tf.concat([obs_batch, obs], axis=-1)
-            update_obs = tf.scatter_update(self.obs_variable, indices, tf.slice(obs_batch, (0, 0, 0, 1), (-1, -1, -1, -1)))
-            with tf.control_dependencies([update_obs]):
-                return tf.expand_dims(obs_batch, axis=1)
 
     def close(self):
         pass

@@ -1,6 +1,6 @@
 {
     "game": "frostbite",
-    "model": "Model",
+    "model": "LargeModel",
     "num_validation_episodes": 30,
     "num_test_episodes": 200,
     "population_size": 1000,

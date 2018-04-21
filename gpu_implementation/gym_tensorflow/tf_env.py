@@ -59,6 +59,10 @@ class PythonEnv(TensorFlowEnv):
         with tf.variable_scope(name, default_name='PythonFinalState'):
             return tf.zeros([tf.shape(indices)[0], 2], dtype=tf.float32)
 
+    @property
+    def unwrapped(self):
+        return self
+
     def close(self):
         pass
 

@@ -57,12 +57,14 @@ class RLEvalutionWorker(AsyncWorker):
 
                 with tf.device(device):
                     self.obs_op = self.env.observation(indices=self.placeholder_indices)
-                    self.action_op = self.model.make_net(self.obs_op, self.env.action_space, indices=self.placeholder_indices, batch_size=self.batch_size, ref_batch=ref_batch)
+                    obs = tf.expand_dims(self.obs_op, axis=1)
+                    self.action_op = self.model.make_net(obs, self.env.action_space, indices=self.placeholder_indices, batch_size=self.batch_size, ref_batch=ref_batch)
                 self.model.initialize()
 
                 if self.env.discrete_action:
                     self.action_op = tf.argmax(self.action_op[:tf.shape(self.placeholder_indices)[0]], axis=-1, output_type=tf.int32)
-                self.rew_op, self.done_op = self.env.step(self.action_op, indices=self.placeholder_indices)
+                with tf.device(device):
+                    self.rew_op, self.done_op = self.env.step(self.action_op, indices=self.placeholder_indices)
 
                 self.steps_counter = tf.Variable(np.zeros((), dtype=np.int64))
                 self.incr_counter = tf.assign_add(self.steps_counter, tf.cast(tf.reduce_prod(tf.shape(self.placeholder_indices)), dtype=tf.int64))
@@ -131,7 +133,7 @@ class ConcurrentWorkers(object):
         with tf.Session() as sess:
             import gym_tensorflow
             ref_batch = gym_tensorflow.get_ref_batch(make_env_f, sess, 128)
-            ref_batch=ref_batch[:, 0, ...]
+            ref_batch=ref_batch[:, ...]
         if input_queue is None and done_queue is None:
             self.workers = [RLEvalutionWorker(make_env_f, *args, ref_batch=ref_batch, **dict(kwargs, device=gpus[i])) for i in range(len(gpus))]
             self.model = self.workers[0].model

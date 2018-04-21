@@ -2,12 +2,13 @@ import tensorflow as tf
 import numpy as np
 from .tf_env import GymEnv
 from.import atari, maze
+from .wrappers import StackFramesWrapper
 
 def make(game, batch_size, *args, **kwargs):
     if game == 'maze':
         return maze.MazeEnv(batch_size)
     if game in atari.games:
-        return atari.AtariEnv(game, batch_size, *args, **kwargs)
+        return StackFramesWrapper(atari.AtariEnv(game, batch_size, *args, **kwargs))
     if game == 'humanoid':
         return mujoco.HumanoidMO('Humanoid-v1', batch_size, *args, **kwargs)
     if game.startswith('par.'):
