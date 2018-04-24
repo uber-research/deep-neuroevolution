@@ -9,10 +9,6 @@ def make(game, batch_size, *args, **kwargs):
         return maze.MazeEnv(batch_size)
     if game in atari.games:
         return StackFramesWrapper(atari.AtariEnv(game, batch_size, *args, **kwargs))
-    if game == 'humanoid':
-        return mujoco.HumanoidMO('Humanoid-v1', batch_size, *args, **kwargs)
-    if game.startswith('par.'):
-        return SubprocVecEnv([lambda: make(game[4:], 1, *args, **kwargs) for _ in range(batch_size)])
     if game.startswith('gym.'):
         return GymEnv(game[4:], batch_size, *args, **kwargs)
     raise NotImplementedError(game)
