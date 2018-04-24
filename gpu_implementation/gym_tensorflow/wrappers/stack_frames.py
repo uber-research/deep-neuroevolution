@@ -34,8 +34,8 @@ class StackFramesWrapper(TensorFlowEnv):
         obs = self.env.observation(indices)
 
         if reset:
-            obs_batch = tf.zeros((tf.shape(indices)[0],) +self.env.observation_space[1:-1] + (self.env.observation_space[-1] * self.num_stacked_frames-2, ), dtype=tf.float32)
-            obs_batch = tf.concat([obs_batch, obs, obs], axis=-1)
+            obs_batch = tf.zeros((tf.shape(indices)[0],) +self.env.observation_space[1:-1] + (self.env.observation_space[-1] * self.num_stacked_frames-1, ), dtype=tf.float32)
+            obs_batch = tf.concat([obs_batch, obs], axis=-1)
         else:
             obs_batch = tf.gather(self.obs_variable, indices)
             obs_batch = tf.slice(obs_batch, (0, 0, 0, 1), (-1, -1, -1, -1))
