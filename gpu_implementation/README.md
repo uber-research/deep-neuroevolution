@@ -31,7 +31,7 @@ python ga.py ga_atari_config.json
 ```
 Random search (It's a special case of GA where 0 individuals become parents):
 ```
-python ga.py ra_atari_config.json
+python ga.py rs_atari_config.json
 ```
 
 Evolution Strategies:
