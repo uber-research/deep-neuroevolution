@@ -1,5 +1,5 @@
 ## AI Labs - GPU Neuroevolution
-This folder constains preliminary work done to implement GPU-based deep neuroevolution.
+This folder contains preliminary work done to implement GPU-based deep neuroevolution.
 For problems like Atari where the policy evaluation takes a considerable amount of time it is advantageous to make use of GPUs to evaluate the Neural Networks. This code shows how it is possible to run Atari simulations in parallel using the GPU in a way where we can evaluate neural networks in batches and have both CPU and GPU operating at the same time.
 
 This folder has code in prototype stage and still requires a lot of changes to optimize performance, maintanability, and testing. We welcome pull requests to this repo and have plans to improve it in the future. Although it can run on CPU-only, it is slower than our original implementation due to overhead. Once this implementation has matured we plan on distributing it as a package for easy installation. We included an implementation of the HardMaze, but the GA-NS implementation will be added later on.
