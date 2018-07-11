@@ -97,7 +97,7 @@ git clone https://github.com/uber-common/deep-neuroevolution.git
 cd deep-neuroevolution
 ```
 
-Start the container launching the redis instance, use sudo if required (see also [this page](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user)).
+Start the container launching the redis instance, use sudo if required, see also [this page](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).
 
 ```
 sudo docker-compose up
