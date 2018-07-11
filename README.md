@@ -90,14 +90,14 @@ You can also run the code inside a docker container using docker and docker-comp
 See https://docs.docker.com/get-started/ for an introduction to docker.  
 See also https://docs.docker.com/compose/overview/ for an introduction to docker-compose.  
 
-clone repo and enter dir
+Clone repo and enter the directory.
 
 ```
 git clone https://github.com/uber-common/deep-neuroevolution.git
 cd deep-neuroevolution
 ```
 
-Start the container launching the redis instance, use sudo if required (see also (this page)[https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user]).
+Start the container launching the redis instance, use sudo if required (see also [this page](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user)).
 
 ```
 sudo docker-compose up
@@ -115,5 +115,3 @@ Start the experiment of your choice as stated above. E.g.
 cd ~/deep-neuroevolution/
 . scripts/local_run_exp.sh es configurations/frostbite_es.json
 ```
-
-
