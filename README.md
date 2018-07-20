@@ -82,3 +82,36 @@ python -m scripts.viz 'Humanoid-v1' <YOUR_H5_FILE>
 ### extra folder
 The extra folder holds the XML specification file for the  Humanoid
 Locomotion with Deceptive Trap domain used in https://arxiv.org/abs/1712.06560. Use this XML file in gym to recreate the environment.
+
+## How to run in docker container
+
+You can also run the code inside a docker container using docker and docker-compose.  
+
+See https://docs.docker.com/get-started/ for an introduction to docker.  
+See also https://docs.docker.com/compose/overview/ for an introduction to docker-compose.  
+
+Clone repo and enter the directory.
+
+```
+git clone https://github.com/uber-common/deep-neuroevolution.git
+cd deep-neuroevolution
+```
+
+Start the container launching the redis instance, use sudo if required, see also [this page](https://docs.docker.com/install/linux/linux-postinstall/#manage-docker-as-a-non-root-user).
+
+```
+sudo docker-compose up
+```
+
+Open up a second terminal session into the container.
+
+```
+sudo docker exec -it deepneuro /bin/bash
+```
+
+Start the experiment of your choice as stated above. E.g.
+
+```
+cd ~/deep-neuroevolution/
+. scripts/local_run_exp.sh es configurations/frostbite_es.json
+```

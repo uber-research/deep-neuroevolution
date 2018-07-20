@@ -1,0 +1,10 @@
+version: '3'
+
+# Upon 'docker-compose up' builds one image from Dockerfile and starts 
+# a container with interactive session.   
+services:
+    deepneuro:
+        container_name: deepneuro
+        build: .
+        stdin_open: true
+        tty: true
