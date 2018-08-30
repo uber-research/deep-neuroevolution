@@ -207,7 +207,7 @@ def run_master(master_redis_cfg, log_dir, exp):
         while not new_task_checker:
             # Query master to see if new task declaration registers
             for _ in range(1000):
-                temp_task_id, _ = master.pop_result(flushing=True)
+                temp_task_id, _ = master.pop_result()
                 if temp_task_id == curr_task_id:
                     new_task_checker = True; break
 
