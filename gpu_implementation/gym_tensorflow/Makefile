@@ -26,9 +26,8 @@ endif
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
-    FLAGS += -Wl
     ifeq ($(USE_ALE),1)
-        FLAGS+= -rpath=$(ALE)/build
+        FLAGS+= -Wl -rpath=$(ALE)/build
     endif
 endif
 
