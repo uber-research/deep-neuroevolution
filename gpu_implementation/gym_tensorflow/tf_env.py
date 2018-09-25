@@ -30,16 +30,24 @@ class TensorFlowEnv(object):
 
 class PythonEnv(TensorFlowEnv):
     def step(self, action, indices=None, name=None):
+
+        if indices is None:
+            indices = np.arange(self.batch_size)
         with tf.variable_scope(name, default_name='PythonStep'):
-            reward, done = tf.py_func(self._step, [action, indices], [tf.float32, tf.bool])
-            reward.set_shape(indices.get_shape())
-            done.set_shape(indices.get_shape())
-            return reward, done
+
+            with tf.device('/cpu:0'):
+                reward, done = tf.py_func(self._step, [action, indices], [tf.float32, tf.bool])
+                reward.set_shape(indices.shape)
+                done.set_shape(indices.shape)
+                return reward, done
 
     def _reset(self, indices):
         raise NotImplementedError()
 
     def reset(self, indices=None, max_frames=None, name=None):
+        
+        if indices is None:
+            indices = np.arange(self.batch_size)
         with tf.variable_scope(name, default_name='PythonReset'):
             return tf.py_func(self._reset, [indices], tf.int64).op
 
@@ -50,9 +58,14 @@ class PythonEnv(TensorFlowEnv):
         raise NotImplementedError()
 
     def observation(self, indices=None, name=None):
+
+        if indices is None:
+            indices = np.arange(self.batch_size)
         with tf.variable_scope(name, default_name='PythonObservation'):
-            obs = tf.py_func(self._obs, [indices], tf.float32)
-            obs.set_shape(tuple(indices.get_shape()) + self.observation_space)
+
+            with tf.device('/cpu:0'):
+                obs = tf.py_func(self._obs, [indices], tf.float32)
+                obs.set_shape(tuple(indices.shape) + self.observation_space)
             return tf.expand_dims(obs, axis=1)
 
     def final_state(self, indices, name=None):
@@ -72,10 +85,13 @@ class GymEnv(PythonEnv):
         import gym
         self.env = [gym.make(name) for _ in range(batch_size)]
         self.obs = [None] * batch_size
+        self.is_discrete_action = isinstance( self.env[0].action_space , gym.spaces.Discrete ) 
+        self.batch_size = batch_size
 
     @property
     def action_space(self):
-        return np.prod(self.env[0].action_space.shape)
+        #return np.prod(self.env[0].action_space.shape, dtype=np.int32)
+        return self.env[0].action_space.n
 
     @property
     def observation_space(self):
@@ -83,10 +99,14 @@ class GymEnv(PythonEnv):
 
     @property
     def discrete_action(self):
-        return False
+        return self.is_discrete_action
+
+    @property
+    def env_default_timestep_cutoff(self):
+        return 1000
 
     def _step(self, action, indices):
-        assert self.discrete_action == False
+        assert self.discrete_action == True 
         results = map(lambda i: self.env[indices[i]].step(action[i]), range(len(indices)))
         obs, reward, done, _ = zip(*results)
         for i in range(len(indices)):
