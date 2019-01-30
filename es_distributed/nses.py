@@ -140,6 +140,25 @@ def run_master(master_redis_cfg, log_dir, exp):
             ref_batch=ref_batch if policy.needs_ref_batch else None,
             timestep_limit=tslimit
         ))
+        master.flush_results()
+        new_task_checker = False
+        while not new_task_checker:
+            # Query master to see if new task declaration registers
+            for _ in range(1000):
+                temp_task_id, _ = master.pop_result()
+                if temp_task_id == curr_task_id:
+                    new_task_checker = True; break
+
+            # Re-declare task if original declaration fails to register
+            if not new_task_checker:
+                master.task_counter -= 1
+                curr_task_id = master.declare_task(Task(
+                    params=theta,
+                    ob_mean=ob_stat.mean if policy.needs_ob_stat else None,
+                    ob_std=ob_stat.std if policy.needs_ob_stat else None,
+                    ref_batch=ref_batch if policy.needs_ref_batch else None,
+                    timestep_limit=tslimit
+                ))
         tlogger.log('********** Iteration {} **********'.format(curr_task_id))
 
         # Pop off results for the current task
@@ -286,8 +305,7 @@ def run_master(master_redis_cfg, log_dir, exp):
         else:
             raise NotImplementedError(exp['novelty_search']['selection_method'])
 
-        # if config.snapshot_freq != 0 and curr_task_id % config.snapshot_freq == 0:
-        if config.snapshot_freq != 0:
+        if config.snapshot_freq != 0 and curr_task_id % config.snapshot_freq == 0:
             import os.path as osp
             filename = 'snapshot_iter{:05d}_rew{}.h5'.format(
                 curr_task_id,
