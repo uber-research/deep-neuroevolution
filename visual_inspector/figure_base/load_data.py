@@ -5,7 +5,10 @@ import pandas as pd
 import os.path as osp
 
 def color_index(fitness, minfit, maxfit):
-    cind = (fitness - minfit)/(maxfit - minfit) * gs.numBins
+    if maxfit == minfit:
+        cind = 0.0
+    else:    
+        cind = (fitness - minfit)/(maxfit - minfit) * gs.numBins
     cind = int(cind)
     if cind >= gs.numBins:
         cind = gs.numBins-1
