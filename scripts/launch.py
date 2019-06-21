@@ -51,7 +51,7 @@ def upload_archive(exp_name, archive_excludes, s3_bucket):
     highlight(" ".join(upload_cmd))
     subprocess.check_call(upload_cmd)
 
-    presign_cmd = ["aws", "s3", "presign", remote_archive_path, "--expires-in", str(60 * 60 * 24 * 30)]
+    presign_cmd = ["aws", "s3", "presign", remote_archive_path, "--expires-in", str(604800)]
     highlight(" ".join(presign_cmd))
     remote_url = subprocess.check_output(presign_cmd).decode("utf-8").strip()
     return remote_url
