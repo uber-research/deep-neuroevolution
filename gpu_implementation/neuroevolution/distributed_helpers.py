@@ -44,10 +44,14 @@ class WorkerHub(object):
 
     def worker_callback(self, worker, subworker, result):
         worker_task = (worker, subworker)
-        self.available_workers.put(worker_task)
         task_id = self._cache[worker_task]
         del self._cache[worker_task]
         self.done_buffer.put((task_id, result))
+        # Return back to queue only after cleaning the cache to avoid
+        # possible race conditions. Otherwise the worker can be reused and
+        # come back to this method while cache become cleared from previous 
+        # visit and this will result in error.
+        self.available_workers.put(worker_task)
 
     @staticmethod
     def _handle_input(self):
