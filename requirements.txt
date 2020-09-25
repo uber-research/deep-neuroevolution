@@ -11,5 +11,5 @@ pyparsing==2.2.0
 redis==2.10.5
 requests>=2.20.0
 six==1.10.0
-tensorflow==0.12.1
+tensorflow==1.15.4
 Werkzeug==0.12.1
