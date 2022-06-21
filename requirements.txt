@@ -3,7 +3,7 @@ click==6.7
 gym==0.9.4
 h5py==2.7.0
 mujoco-py==0.5.7
-numpy==1.12.1
+numpy==1.22.0
 packaging==16.8
 pyglet==1.2.4
 PyOpenGL==3.1.0
