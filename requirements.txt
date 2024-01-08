@@ -3,13 +3,14 @@ click==6.7
 gym==0.9.4
 h5py==2.7.0
 mujoco-py==0.5.7
-numpy==1.12.1
+numpy==1.22.2
 packaging==16.8
 pyglet==1.2.4
 PyOpenGL==3.1.0
 pyparsing==2.2.0
 redis==2.10.5
-requests>=2.20.0
+requests>=2.31.0
 six==1.10.0
 tensorflow==0.12.1
 Werkzeug==0.12.1
+certifi>=2023.7.22 # not directly required, pinned by Snyk to avoid a vulnerability
